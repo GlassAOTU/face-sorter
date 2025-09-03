@@ -1,32 +1,35 @@
 # FaceSorter
 
-A minimal, practical face-sorting script for Windows, macOS, or Linux. Uses InsightFace's `buffalo_l` model for face detection and recognition. Automatically downloads models on first run. Runs on CPU by default; GPU optional with `onnxruntime-gpu`. Sorts photos into `output/<Person>/` or `output/Unknown/`.
+A no-nonsense face-sorting script for Windows, macOS, or Linux. Uses InsightFace's `buffalo_l` model for face detection and recognition. Models download automatically on first run. Runs on CPU by default; GPU optional with `onnxruntime-gpu`. Sorts photos into `output/<Person>/` or `output/Unknown/`.
 
 ## Features
-- Robust image reading with Pillow (supports PNG, JPEG, WebP, BMP) and OpenCV fallback.
-- Recursive scanning of input photos.
-- Cosine similarity-based matching with tunable threshold.
-- Filters small faces to avoid noise.
+- Reads images (PNG, JPEG, WebP, BMP) with Pillow, falls back to OpenCV.
+- Scans input folders recursively.
+- Matches faces using cosine similarity with a tunable threshold.
+- Filters out small faces to reduce noise.
 - Option to copy or move files.
 - Progress bar via `tqdm`.
 
-## Prerequisites
-Install dependencies:
+## Setup
+Use a virtual environment to avoid wrecking your system Python:
 ```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install insightface onnxruntime opencv-python numpy pillow tqdm
-```
-For HEIC support (e.g., iPhone photos):
-```bash
+# Optional for HEIC (iPhone photos):
 pip install pillow-heif
-```
-For GPU support (optional):
-```bash
+# Optional for GPU:
 pip install onnxruntime-gpu
+```
+Deactivate when done:
+```bash
+deactivate
 ```
 
 ## Usage
-Run from the project root:
+Activate the virtual environment first:
 ```bash
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 python face_sorter.py \
   --gallery ./gallery \
   --input ./input_photos \
@@ -39,11 +42,11 @@ Optional flags:
 - `--gpu`: Use GPU if `onnxruntime-gpu` is installed.
 
 ### Arguments
-- `--gallery`: Folder with subfolders named by person (e.g., `./gallery/Alice/`, `./gallery/Bob/`), containing labeled example images.
-- `--input`: Folder of photos to sort (recursively scanned).
-- `--output`: Destination folder for sorted photos.
-- `--threshold`: Cosine similarity threshold for matching (0.30–0.45; start with 0.35 and tune).
-- `--min-face`: Minimum face size (pixels) to consider (default: 90).
+- `--gallery`: Folder with subfolders named by person (e.g., `./gallery/Alice/`, `./gallery/Bob/`) containing example images.
+- `--input`: Folder of photos to sort (recursive).
+- `--output`: Destination for sorted photos.
+- `--threshold`: Cosine similarity threshold (0.30–0.45; start at 0.35, tweak as needed).
+- `--min-face`: Minimum face size in pixels (default: 90).
 
 ## Folder Structure
 ```
@@ -61,20 +64,23 @@ project_root/
 │   ├── Person1/
 │   ├── Person2/
 │   ├── Unknown/
+├── .gitignore
+├── .gitkeep
 ```
+To include empty folders in Git, add `.gitkeep` files (e.g., `touch gallery/.gitkeep`). Add `venv/` to `.gitignore`.
 
 ## Notes
-- **Threshold**: 0.30–0.45 is typical. Lower values increase matches but risk errors; higher values are stricter.
-- **Face Size**: `--min-face` filters out small faces (e.g., in backgrounds). Adjust based on image resolution.
-- **Performance**: CPU is sufficient for most cases. GPU can speed up processing for large datasets.
-- **Image Formats**: Supports JPG, JPEG, PNG, WebP, BMP. HEIC requires `pillow-heif`.
-- **Gallery Quality**: Use clear, well-lit face images in `gallery/` for best results.
+- **Threshold**: 0.30–0.45 works best. Lower risks false positives; higher is stricter.
+- **Face Size**: `--min-face` skips tiny faces (e.g., background noise). Adjust for your image resolution.
+- **Performance**: CPU is fine for most. GPU speeds things up for large datasets.
+- **Formats**: Supports JPG, JPEG, PNG, WebP, BMP. HEIC needs `pillow-heif`.
+- **Gallery**: Use clear, well-lit face images for best results.
 
 ## Troubleshooting
 - **No faces detected**: Check image quality or lower `--min-face`.
-- **Wrong matches**: Adjust `--threshold` (higher for stricter matching).
-- **No embeddings**: Ensure `gallery/` has valid images and subfolders.
-- **HEIC issues**: Install `pillow-heif` for iPhone photos.
+- **Misclassified faces**: Tweak `--threshold` (higher for precision).
+- **No embeddings**: Verify `gallery/` has valid images in named subfolders.
+- **HEIC errors**: Install `pillow-heif`.
 
 ## License
-MIT License. Use freely, but no warranties provided.
+MIT License. Use it, but don’t expect hand-holding.
